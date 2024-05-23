@@ -14,5 +14,8 @@ query Character($characterId: ID!) {
         location {
             name
         }
+        episode {
+            name
+        }
     }
 }

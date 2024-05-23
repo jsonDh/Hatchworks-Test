@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Hatchworks-Test</string>
     <string name="characters_list_error">An error occurred while getting the characters list.</string>
+    <string name="characters_details_error">An error occurred while getting the character details.</string>
 </resources>
