@@ -3,7 +3,6 @@ query CharactersList {
         results {
             id
             name
-            status
             species
             image
         }
