@@ -1,8 +1,6 @@
 package com.json.hatchworks_test.presentation.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.exception.ApolloException
@@ -10,7 +8,7 @@ import com.json.hatchworks_test.CharactersListQuery
 import com.json.hatchworks_test.domain.repository.CharacterRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -18,9 +16,9 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class CharactersViewModel @Inject constructor(private val repository: CharacterRepository) : ViewModel() {
+class CharacterListViewModel @Inject constructor(private val repository: CharacterRepository) :
+    ViewModel() {
 
-    private var job: Job? = null
     private val _charactersListState = MutableStateFlow<CharactersListState>(CharactersListState.Initial)
     val charactersListState: StateFlow<CharactersListState> = _charactersListState
 
@@ -31,8 +29,9 @@ class CharactersViewModel @Inject constructor(private val repository: CharacterR
     private fun getCharactersList() {
         Log.d(TAG, "Getting characters list...")
         _charactersListState.value = CharactersListState.Loading
-        job = viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
+                delay(500) // Just a small delay to provide better user experience between the empty views and the actual data
                 val response = repository.getCharacterList()
                 withContext(Dispatchers.Main) {
                     _charactersListState.value = CharactersListState.Success(response.data?.characters?.results)
