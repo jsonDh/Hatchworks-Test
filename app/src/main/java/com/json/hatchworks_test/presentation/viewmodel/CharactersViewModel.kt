@@ -21,8 +21,8 @@ import javax.inject.Inject
 class CharactersViewModel @Inject constructor(private val repository: CharacterRepository) : ViewModel() {
 
     private var job: Job? = null
-    private val _charactersState = MutableStateFlow<CharactersState>(CharactersState.Initial)
-    val charactersState: StateFlow<CharactersState> = _charactersState
+    private val _charactersListState = MutableStateFlow<CharactersListState>(CharactersListState.Initial)
+    val charactersListState: StateFlow<CharactersListState> = _charactersListState
 
     fun getCharacters() {
         getCharactersList()
@@ -30,29 +30,29 @@ class CharactersViewModel @Inject constructor(private val repository: CharacterR
 
     private fun getCharactersList() {
         Log.d(TAG, "Getting characters list...")
-        _charactersState.value = CharactersState.Loading
+        _charactersListState.value = CharactersListState.Loading
         job = viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = repository.getCharacterList()
                 withContext(Dispatchers.Main) {
-                    _charactersState.value = CharactersState.Success(response.data?.characters?.results)
+                    _charactersListState.value = CharactersListState.Success(response.data?.characters?.results)
                     Log.d(TAG, response.data?.characters?.results.toString())
                 }
             } catch (e: ApolloException) {
-                _charactersState.value = CharactersState.Error(e.message.toString())
+                _charactersListState.value = CharactersListState.Error(e.message.toString())
             }
         }
     }
 
     companion object {
-        private const val TAG = "CHARACTERS-VIEW-MODEL"
+        private const val TAG = "CHARACTERS-LIST-VIEW-MODEL"
     }
 
 }
 
-sealed class CharactersState {
-    object Initial : CharactersState()
-    object Loading : CharactersState()
-    data class Success(val data: List<CharactersListQuery.Result?>?) : CharactersState()
-    data class Error(val message: String) : CharactersState()
+sealed class CharactersListState {
+    object Initial : CharactersListState()
+    object Loading : CharactersListState()
+    data class Success(val data: List<CharactersListQuery.Result?>?) : CharactersListState()
+    data class Error(val message: String) : CharactersListState()
 }

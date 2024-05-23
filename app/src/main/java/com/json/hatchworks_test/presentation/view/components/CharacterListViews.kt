@@ -28,12 +28,12 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.json.hatchworks_test.CharactersListQuery
 import com.json.hatchworks_test.R
-import com.json.hatchworks_test.presentation.viewmodel.CharactersState
+import com.json.hatchworks_test.presentation.viewmodel.CharactersListState
 
 @Composable
-fun ShowCharactersList(charactersState: CharactersState?) {
+fun ShowCharactersList(charactersState: CharactersListState?) {
     when (charactersState) {
-        is CharactersState.Success -> {
+        is CharactersListState.Success -> {
             val characters = charactersState.data?.filterNotNull() ?: emptyList()
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2)
@@ -43,8 +43,8 @@ fun ShowCharactersList(charactersState: CharactersState?) {
                 }
             }
         }
-        is CharactersState.Loading -> ShowLoading()
-        is CharactersState.Error -> ShowError(stringResource(id = R.string.characters_list_error))
+        is CharactersListState.Loading -> ShowLoading()
+        is CharactersListState.Error -> ShowError(stringResource(id = R.string.characters_list_error))
         else -> {}
     }
 }
@@ -99,13 +99,4 @@ fun CharacterCard(character: CharactersListQuery.Result?) {
             }
         }
     }
-}
-
-@Composable
-@Preview
-fun PreviewItems() {
-    val char: CharactersListQuery.Result = CharactersListQuery.Result(
-        "1", "Rick", "Alive", "Human", "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
-    )
-    CharacterCard(character = char)
 }

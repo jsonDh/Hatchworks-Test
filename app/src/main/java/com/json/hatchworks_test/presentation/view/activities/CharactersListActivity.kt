@@ -19,10 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.lifecycleScope
 import com.json.hatchworks_test.R
-import com.json.hatchworks_test.presentation.viewmodel.CharactersState
 import com.json.hatchworks_test.presentation.viewmodel.CharactersViewModel
 import com.json.hatchworks_test.presentation.ui.theme.HatchworksTestTheme
 import com.json.hatchworks_test.presentation.view.components.ShowCharactersList
+import com.json.hatchworks_test.presentation.viewmodel.CharactersListState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -39,8 +39,8 @@ class CharactersListActivity : ComponentActivity() {
             }
         }
         lifecycleScope.launch {
-            charactersViewModel.charactersState.collect { charactersState ->
-                if (charactersState is CharactersState.Initial) {
+            charactersViewModel.charactersListState.collect { charactersState ->
+                if (charactersState is CharactersListState.Initial) {
                     charactersViewModel.getCharacters()
                 }
             }
@@ -51,7 +51,7 @@ class CharactersListActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterListScreen(charactersViewModel: CharactersViewModel) {
-    val charactersState by charactersViewModel.charactersState.collectAsState()
+    val charactersState by charactersViewModel.charactersListState.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(
