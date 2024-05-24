@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,15 +28,15 @@ class CharacterListViewModel @Inject constructor(private val repository: Charact
     }
 
     private fun getCharactersList() {
-        Log.d(TAG, "Getting characters list...")
+        Timber.tag(TAG).d("Getting characters list...")
         _charactersListState.value = CharactersListState.Loading
         viewModelScope.launch {
             try {
                 delay(500) // Just a small delay to provide better user experience between the empty views and the actual data
                 val response = repository.getCharacterList()
-                withContext(Dispatchers.Main) {
+                withContext(Dispatchers.IO) {
                     _charactersListState.value = CharactersListState.Success(response.data?.characters?.results)
-                    Log.d(TAG, response.data?.characters?.results.toString())
+                    Timber.tag(TAG).d(response.data?.characters?.results.toString())
                 }
             } catch (e: ApolloException) {
                 _charactersListState.value = CharactersListState.Error(e.message.toString())
@@ -50,8 +51,8 @@ class CharacterListViewModel @Inject constructor(private val repository: Charact
 }
 
 sealed class CharactersListState {
-    object Initial : CharactersListState()
-    object Loading : CharactersListState()
+    data object Initial : CharactersListState()
+    data object Loading : CharactersListState()
     data class Success(val data: List<CharactersListQuery.Result?>?) : CharactersListState()
     data class Error(val message: String) : CharactersListState()
 }

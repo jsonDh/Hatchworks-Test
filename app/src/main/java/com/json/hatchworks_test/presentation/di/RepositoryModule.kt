@@ -19,6 +19,4 @@ class RepositoryModule {
             .serverUrl(BuildConfig.APOLLO_API)
             .build()
     }
-
-
 }
