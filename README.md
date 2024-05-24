@@ -56,11 +56,20 @@ The project follows a single-activity architecture with Jetpack Compose for UI a
 
 ## Screenshots
 
-### Characters List Empty View - Dark Mode
+### Characters List Empty View
 ![Screenshot_20240524-111206](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/ac4fb4b0-7c95-4da7-8afb-d00937b1ad91)
-### Characters List - Dark Mode
+![Screenshot_20240524-112914](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/d701dac7-3501-49b8-b3e6-140e4d06291c)
+
+### Characters List
 ![Screenshot_20240524-111217](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/0123eb63-a9a6-45c9-82ea-9857923c21bf)
-### Character Details Empty View - Dark Mode
+![Screenshot_20240524-112919](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/9dfa53c8-b68f-4e4f-8c76-5f7897a3e59d)
+
+### Character Details Empty View
 ![Screenshot_20240524-111221](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/22438c79-f0bc-46ca-8b03-fba6c8bec628)
-### Character Details - Dark Mode
+![Screenshot_20240524-112931](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/848df2f4-3990-4a52-be78-695cb3c91311)
+
+### Character Details
 ![Screenshot_20240524-111225](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/be933eb9-4a47-4b55-bc2b-0d15c4beb542)
+![Screenshot_20240524-112925](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/f06077f5-6b38-44a6-a131-b5501f32906e)
+
+
