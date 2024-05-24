@@ -22,19 +22,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.res.stringResource
 import com.json.hatchworks_test.R
 
-@Composable
-fun LargeAppBar(title : String){
-    LargeTopAppBar(
-        title = {
-            Text(text = title)
-        },
-        colors = TopAppBarDefaults.largeTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary
-        )
-    )
-}
 
+/**
+ * Handles back press events within a composable.
+ *
+ * @param backPressedDispatcher OnBackPressedDispatcher to handle back press events.
+ * @param onBackPressed Callback function to execute when back press event occurs.
+ */
 @Composable
 fun BackPressHandler(
     backPressedDispatcher: OnBackPressedDispatcher? =
@@ -60,19 +54,29 @@ fun BackPressHandler(
     }
 }
 
+
+/**
+ * Displays a small app bar with a title.
+ */
 @Composable
 fun SmallAppBar(){
     TopAppBar(
         title = {
             Text(stringResource(id = R.string.app_name))
         },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary
         )
     )
 }
 
+
+/**
+ * Displays a snackbar with an error message.
+ *
+ * @param message The error message to display.
+ */
 @Composable
 fun ShowError(message: String) {
     val snackBarState = remember { SnackbarHostState() }

@@ -59,12 +59,20 @@ import com.json.hatchworks_test.presentation.viewmodel.CharacterState
 import com.json.hatchworks_test.presentation.viewmodel.CharacterViewModel
 import com.json.hatchworks_test.utils.convertDateStringToReadable
 
+/**
+ * Displays the details of a character.
+ *
+ * @param characterId ID of the character to display details for.
+ * @param characterViewModel ViewModel to fetch character details.
+ * @param navController Controller to manage navigation actions.
+ */
 @Composable
 fun CharacterDetailFragment(
     characterId: String,
     characterViewModel: CharacterViewModel,
     navController: NavController
 ) {
+    // Collect and handle character state
     LaunchedEffect(Unit) {
         characterViewModel.characterState.collect { charactersState ->
             if (charactersState is CharacterState.Initial) {
@@ -74,7 +82,7 @@ fun CharacterDetailFragment(
         }
     }
 
-    //Handle back press
+    // Handle back press and screen rotation
     val goBack = {
         navController.popBackStack()
         characterViewModel.clearData()
@@ -119,6 +127,13 @@ fun CharacterDetailFragment(
     )
 }
 
+
+/**
+ * Determines the UI state of the character details screen based on the character state.
+ *
+ * @param orientation Current screen orientation.
+ * @param characterState Current state of character details.
+ */
 @Composable
 fun CharacterDetailStates(orientation: Int, characterState: CharacterState) {
     when (characterState) {
@@ -145,6 +160,11 @@ fun CharacterDetailStates(orientation: Int, characterState: CharacterState) {
     }
 }
 
+/**
+ * Displays the character details in portrait orientation.
+ *
+ * @param character Character data to display.
+ */
 @Composable
 fun ShowCharacterDetails(character: CharacterQuery.Character) {
     Column {
@@ -153,6 +173,7 @@ fun ShowCharacterDetails(character: CharacterQuery.Character) {
                 .background(MaterialTheme.colorScheme.primary),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Character image card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -175,6 +196,7 @@ fun ShowCharacterDetails(character: CharacterQuery.Character) {
                     modifier = Modifier.fillMaxSize()
                 )
             }
+            // Character name and species
             Text(
                 text = character.name.toString(),
                 modifier = Modifier
@@ -193,6 +215,7 @@ fun ShowCharacterDetails(character: CharacterQuery.Character) {
                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
             )
         }
+        // Character details
         Column {
             val date = character.created.toString().convertDateStringToReadable().toString()
             DetailData(
@@ -210,6 +233,10 @@ fun ShowCharacterDetails(character: CharacterQuery.Character) {
     }
 }
 
+
+/**
+ * Displays a placeholder view when character details are loading (portrait orientation).
+ */
 @Composable
 fun EmptyView() {
     Column {
@@ -218,6 +245,7 @@ fun EmptyView() {
                 .background(MaterialTheme.colorScheme.primary),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Placeholder image card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -258,6 +286,10 @@ fun EmptyView() {
     }
 }
 
+
+/**
+ * Displays a placeholder view when character details are loading (landscape orientation).
+ */
 @Composable
 fun EmptyViewLandscape() {
     Row {
@@ -307,6 +339,12 @@ fun EmptyViewLandscape() {
     }
 }
 
+
+/**
+ * Displays the character details in landscape orientation.
+ *
+ * @param character Character data to display.
+ */
 @Composable
 fun ShowCharacterDetailsLandscape(character: CharacterQuery.Character) {
     Row {
@@ -387,6 +425,14 @@ fun ShowCharacterDetailsLandscape(character: CharacterQuery.Character) {
     }
 }
 
+
+/**
+ * Displays detailed information of a character property.
+ *
+ * @param image Resource ID of the image to display.
+ * @param property Name of the property.
+ * @param detail Detail information of the property.
+ */
 @Composable
 fun DetailData(image: Int, property: String, detail: String) {
     val capitalizeProperty = property.replaceFirstChar { it.uppercase() }
