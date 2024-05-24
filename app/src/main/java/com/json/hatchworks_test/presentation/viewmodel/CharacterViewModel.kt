@@ -1,6 +1,5 @@
 package com.json.hatchworks_test.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.exception.ApolloException
@@ -13,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,7 +32,7 @@ class CharacterViewModel @Inject constructor(private val repository: CharacterRe
 
     suspend fun listen() {
         characterState.collect {
-            Log.d(TAG, "State is ${it.toString()}")
+            Timber.tag(TAG).d("State is %s", it)
         }
     }
 
@@ -42,7 +42,7 @@ class CharacterViewModel @Inject constructor(private val repository: CharacterRe
             try {
                 delay(500) // Just a small delay to provide better user experience between the empty views and the actual data
                 val response = repository.getCharacterDetails(characterId)
-                withContext(Dispatchers.Main) {
+                withContext(Dispatchers.IO) {
                     _characterState.value = CharacterState.Success(response.data)
                 }
             } catch (e: ApolloException) {
@@ -65,8 +65,8 @@ class CharacterViewModel @Inject constructor(private val repository: CharacterRe
 }
 
 sealed class CharacterState {
-    object Initial : CharacterState()
-    object Loading : CharacterState()
+    data object Initial : CharacterState()
+    data object Loading : CharacterState()
     data class Success(val data: CharacterQuery.Data?) : CharacterState()
     data class Error(val message: String) : CharacterState()
 }
