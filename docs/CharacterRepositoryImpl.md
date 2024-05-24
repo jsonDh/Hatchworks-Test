@@ -4,13 +4,13 @@ The `CharacterRepositoryImpl` class implements the `CharacterRepository` interfa
 
 ## Methods
 
-### `suspend fun getCharacterList(): ApolloResponse<CharactersListQuery.Data>`
+`suspend fun getCharacterList(): ApolloResponse<CharactersListQuery.Data>`
 
 Fetches a list of characters.
 
 - Returns: An `ApolloResponse` containing the characters list data.
 
-### `suspend fun getCharacterDetails(id: String): ApolloResponse<CharacterQuery.Data>`
+`suspend fun getCharacterDetails(id: String): ApolloResponse<CharacterQuery.Data>`
 
 Fetches details of a specific character identified by the provided `id`.
 
