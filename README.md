@@ -46,6 +46,18 @@ The project follows a single-activity architecture with Jetpack Compose for UI a
 4. **Run the Application:**
    - Connect your Android device or start an emulator.
    - Click on the "Run" button in Android Studio.
+  
+## Documentation
+
+The project includes documentation to help developers understand the codebase and project structure. The `docs` folder contains detailed documentation generated from code comments using tools like KDoc and Markdown.
+
+### Contents of the `docs` folder:
+
+- **ViewModel Documentation:** Includes documentation for the ViewModel classes, their methods, and states.
+- **Repository Documentation:** Contains documentation for the repository interfaces and implementations.
+- **Other Modules Documentation:** Additional documentation for specific modules or components of the project.
+
+Feel free to explore the `docs` folder to gain insights into the project architecture and implementation details.
 
 ## Usage
 - Upon launching the app, you will see a list of Rick & Morty characters.
