@@ -1,4 +1,4 @@
-package com.json.hatchworks_test.ui.theme
+package com.json.hatchworks_test.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
