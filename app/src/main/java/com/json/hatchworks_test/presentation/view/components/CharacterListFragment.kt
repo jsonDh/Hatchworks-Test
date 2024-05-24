@@ -43,8 +43,16 @@ import com.json.hatchworks_test.presentation.view.Screens
 import com.json.hatchworks_test.presentation.viewmodel.CharacterListViewModel
 import com.json.hatchworks_test.presentation.viewmodel.CharactersListState
 
+
+/**
+ * Displays a list of characters.
+ *
+ * @param charactersViewModel ViewModel to fetch characters list.
+ * @param navController Controller to manage navigation actions.
+ */
 @Composable
 fun CharacterListFragment(charactersViewModel: CharacterListViewModel, navController: NavController) {
+    // Fetch characters list if the state is initial
     LaunchedEffect(Unit) {
         charactersViewModel.charactersListState.collect { charactersState ->
             if (charactersState is CharactersListState.Initial) {
@@ -52,24 +60,35 @@ fun CharacterListFragment(charactersViewModel: CharacterListViewModel, navContro
             }
         }
     }
+    // Collect characters list state
     val charactersState by charactersViewModel.charactersListState.collectAsState()
+    // Scaffold containing the top bar and content area
     Scaffold(
         topBar = {
             SmallAppBar()
         },
         content = { padding ->
             Box(modifier = Modifier.padding(padding)) {
+                // Display characters list
                 ShowCharactersList(charactersState, navController)
             }
         }
     )
 }
 
+
+/**
+ * Displays the list of characters based on the state.
+ *
+ * @param charactersListState Current state of the characters list.
+ * @param navController Controller to manage navigation actions.
+ */
 @Composable
 fun ShowCharactersList(charactersListState: CharactersListState?, navController: NavController) {
     when (charactersListState) {
         is CharactersListState.Initial -> EmptyList()
         is CharactersListState.Success -> {
+            // Filter out null characters and display them in a lazy vertical grid
             val characters = charactersListState.data?.filterNotNull() ?: emptyList()
             if (characters.isEmpty()) {
                 EmptyList()
@@ -94,8 +113,15 @@ fun ShowCharactersList(charactersListState: CharactersListState?, navController:
 }
 
 
+/**
+ * Displays a character card.
+ *
+ * @param character Character data to display.
+ * @param navController Controller to manage navigation actions.
+ */
 @Composable
 fun CharacterCard(character: CharactersListQuery.Result?, navController: NavController) {
+    // Card modifier and shape
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -103,9 +129,11 @@ fun CharacterCard(character: CharactersListQuery.Result?, navController: NavCont
             .padding(6.dp, 6.dp)
             .heightIn(0.dp, 250.dp)
             .clickable {
+                // Navigate to character details screen on card click
                 navController.navigate(Screens.CharacterDetailsScreen.withArgs(character?.id.toString()))
             },
         shape = CardDefaults.elevatedShape,
+        // Card colors and elevation
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -114,6 +142,7 @@ fun CharacterCard(character: CharactersListQuery.Result?, navController: NavCont
         )
     ) {
         Column {
+            // Async image loading
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(character?.image)
@@ -126,6 +155,7 @@ fun CharacterCard(character: CharactersListQuery.Result?, navController: NavCont
                     .fillMaxWidth()
                     .weight(0.7f)
             )
+            // Character name and species
             Row(
                 modifier = Modifier
                     .padding(12.dp)
@@ -149,6 +179,9 @@ fun CharacterCard(character: CharactersListQuery.Result?, navController: NavCont
     }
 }
 
+/**
+ * Displays an empty list message.
+ */
 @Composable
 fun EmptyList() {
     HatchworksTestTheme {
@@ -157,11 +190,13 @@ fun EmptyList() {
                 .fillMaxSize()
                 .alpha(0.5f), verticalArrangement = Arrangement.Center
         ) {
+            // Placeholder image
             Image(
                 painter = painterResource(id = R.drawable.rick_ic),
                 contentDescription = "Empty Image View",
                 modifier = Modifier.fillMaxWidth()
             )
+            // Empty list message
             Text(
                 text = "There is no character list at the moment but surely some will come up soon.",
                 modifier = Modifier

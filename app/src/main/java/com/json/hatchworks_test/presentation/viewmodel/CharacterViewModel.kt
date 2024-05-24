@@ -15,21 +15,35 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
+/**
+ * ViewModel responsible for managing character-related operations and maintaining the state of a single character.
+ * It interacts with the repository to fetch character details and exposes the state using a StateFlow.
+ */
 @HiltViewModel
 class CharacterViewModel @Inject constructor(private val repository: CharacterRepository) :
     ViewModel() {
 
+    // StateFlow representing the state of the character
     private val _characterState = MutableStateFlow<CharacterState>(CharacterState.Initial)
     val characterState: StateFlow<CharacterState> = _characterState
 
+    /**
+     * Clears the character state.
+     */
     fun clearData() {
         _characterState.value = CharacterState.Initial
     }
 
+    /**
+     * Retrieves the details of a character by its ID.
+     */
     fun getCharacterDetails(characterId: String) {
         fetchCharacterDetails(characterId)
     }
 
+    /**
+     * Collects and logs the current state of the character.
+     */
     suspend fun listen() {
         characterState.collect {
             Timber.tag(TAG).d("State is %s", it)

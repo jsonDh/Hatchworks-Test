@@ -20,24 +20,35 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity(){
 
+    // ViewModel for character details
     private val detailsViewModel: CharacterViewModel by viewModels()
+
+    // ViewModel for character list
     private val listViewModel: CharacterListViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            // Applying the app theme
             HatchworksTestTheme {
+                // Create NavController for managing navigation
                 val navController = rememberNavController()
+
+                // Setting up the NavHost with the initial route
                 NavHost(
                     navController = navController,
                     startDestination = Screens.CharacterListScreen.route
                 ) {
+
+                    // Composable for character list screen
                     composable(Screens.CharacterListScreen.route) {
                         CharacterListFragment(
                             charactersViewModel = listViewModel,
                             navController = navController
                         )
                     }
+
+                    // Composable for character details screen with characterId argument
                     composable(Screens.CharacterDetailsScreen.route + "/{characterId}", listOf(
                         navArgument("characterId") {
                             type = NavType.StringType
