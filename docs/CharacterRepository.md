@@ -4,13 +4,13 @@ The `CharacterRepository` interface defines methods for interacting with charact
 
 ## Methods
 
-### `suspend fun getCharacterList(): CharactersListQuery.Result`
+`suspend fun getCharacterList(): CharactersListQuery.Result`
 
 Fetches a list of characters.
 
 - Returns: A list of characters wrapped in a `CharactersListQuery.Result` object.
 
-### `suspend fun getCharacterDetails(characterId: String): CharacterQuery.Data`
+`suspend fun getCharacterDetails(characterId: String): CharacterQuery.Data`
 
 Fetches details of a specific character identified by the provided `characterId`.
 
