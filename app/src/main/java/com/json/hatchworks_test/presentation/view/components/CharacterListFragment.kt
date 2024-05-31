@@ -1,18 +1,24 @@
 package com.json.hatchworks_test.presentation.view.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,10 +28,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -62,6 +74,12 @@ fun CharacterListFragment(charactersViewModel: CharacterListViewModel, navContro
     }
     // Collect characters list state
     val charactersState by charactersViewModel.charactersListState.collectAsState()
+    var orientation by remember { mutableIntStateOf(Configuration.ORIENTATION_PORTRAIT) }
+    val configuration = LocalConfiguration.current
+    LaunchedEffect(configuration) {
+        snapshotFlow { configuration.orientation }
+            .collect { orientation = it }
+    }
     // Scaffold containing the top bar and content area
     Scaffold(
         topBar = {
@@ -70,7 +88,9 @@ fun CharacterListFragment(charactersViewModel: CharacterListViewModel, navContro
         content = { padding ->
             Box(modifier = Modifier.padding(padding)) {
                 // Display characters list
-                ShowCharactersList(charactersState, navController)
+                ShowCharactersList(orientation, charactersState, navController){
+                    charactersViewModel.reloadAfterError()
+                }
             }
         }
     )
@@ -80,35 +100,60 @@ fun CharacterListFragment(charactersViewModel: CharacterListViewModel, navContro
 /**
  * Displays the list of characters based on the state.
  *
+ * @param orientation Current screen orientation.
  * @param charactersListState Current state of the characters list.
  * @param navController Controller to manage navigation actions.
+ * @param onClick Click method called to retry when an error occurs
  */
 @Composable
-fun ShowCharactersList(charactersListState: CharactersListState?, navController: NavController) {
+fun ShowCharactersList(orientation: Int, charactersListState: CharactersListState?, navController: NavController, onClick: () -> Unit) {
     when (charactersListState) {
-        is CharactersListState.Initial -> EmptyList()
+        is CharactersListState.Initial -> EmptyList(orientation)
         is CharactersListState.Success -> {
             // Filter out null characters and display them in a lazy vertical grid
             val characters = charactersListState.data?.filterNotNull() ?: emptyList()
             if (characters.isEmpty()) {
-                EmptyList()
+                EmptyList(orientation)
             } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2)
-                ) {
-                    items(characters.size) { index ->
-                        CharacterCard(characters[index], navController)
-                    }
-                }
+                DisplayCharactersList(orientation, characters, navController)
             }
         }
 
         is CharactersListState.Loading -> {
-            EmptyList()
+            ShowLoading()
         }
 
-        is CharactersListState.Error -> ShowError(stringResource(id = R.string.characters_list_error))
+        is CharactersListState.Error -> {
+            ShowError(orientation, charactersListState.message){ onClick() }
+        }
         else -> {}
+    }
+}
+
+/**
+ * Displays the list of characters based on the device orientation.
+ *
+ * @param orientation Current screen orientation.
+ * @param characters List of characters to display.
+ * @param navController Controller to manage navigation actions.
+ */
+@Composable
+fun DisplayCharactersList(orientation: Int, characters : List<CharactersListQuery.Result>, navController: NavController){
+    when (orientation){
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            LazyVerticalGrid(columns = GridCells.Fixed(4), modifier = Modifier.padding(80.dp, 0.dp)) {
+                items(characters.size) { index ->
+                    CharacterCard(characters[index], navController)
+                }
+            }
+        }
+        Configuration.ORIENTATION_PORTRAIT -> {
+            LazyVerticalGrid(columns = GridCells.Fixed(2)) {
+                items(characters.size) { index ->
+                    CharacterCard(characters[index], navController)
+                }
+            }
+        }
     }
 }
 
@@ -181,31 +226,63 @@ fun CharacterCard(character: CharactersListQuery.Result?, navController: NavCont
 
 /**
  * Displays an empty list message.
+ * @param orientation Current screen orientation.
  */
 @Composable
-fun EmptyList() {
+fun EmptyList(orientation: Int) {
     HatchworksTestTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .alpha(0.5f), verticalArrangement = Arrangement.Center
-        ) {
-            // Placeholder image
-            Image(
-                painter = painterResource(id = R.drawable.rick_ic),
-                contentDescription = "Empty Image View",
-                modifier = Modifier.fillMaxWidth()
-            )
-            // Empty list message
-            Text(
-                text = "There is no character list at the moment but surely some will come up soon.",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp, 50.dp),
-                textAlign = TextAlign.Center,
-                fontSize = 22.sp,
-                color = MaterialTheme.colorScheme.onTertiaryContainer
-            )
+        when (orientation){
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(0.5f), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Placeholder image
+                    Image(
+                        painter = painterResource(id = R.drawable.rick_ic),
+                        contentDescription = "Empty Image View",
+                        modifier = Modifier.weight(0.5f).padding(0.dp, 10.dp)
+                    )
+                    // Empty list message
+                    Column (
+                        modifier = Modifier.weight(0.5f),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.empty_list_label),
+                            textAlign = TextAlign.Center,
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.width(300.dp)
+                        )
+                    }
+                }
+            }
+            Configuration.ORIENTATION_PORTRAIT -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(0.5f), verticalArrangement = Arrangement.Center
+                ) {
+                    // Placeholder image
+                    Image(
+                        painter = painterResource(id = R.drawable.rick_ic),
+                        contentDescription = "Empty Image View",
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    // Empty list message
+                    Text(
+                        text = stringResource(id = R.string.empty_list_label),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp, 50.dp),
+                        textAlign = TextAlign.Center,
+                        fontSize = 22.sp,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                }
+            }
         }
     }
 }

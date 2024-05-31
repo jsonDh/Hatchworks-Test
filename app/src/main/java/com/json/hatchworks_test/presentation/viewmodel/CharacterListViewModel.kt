@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.exception.ApolloException
 import com.json.hatchworks_test.CharactersListQuery
+import com.json.hatchworks_test.R
 import com.json.hatchworks_test.domain.repository.CharacterRepository
+import com.json.hatchworks_test.utils.NetworkHelper
+import com.json.hatchworks_test.utils.ResourceProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -19,7 +22,11 @@ import javax.inject.Inject
  * ViewModel for managing character list-related operations and state.
  */
 @HiltViewModel
-class CharacterListViewModel @Inject constructor(private val repository: CharacterRepository) :
+class CharacterListViewModel @Inject constructor(
+    private val repository: CharacterRepository,
+    private val networkHelper : NetworkHelper,
+    private val resourceProvider: ResourceProvider
+) :
     ViewModel() {
 
     // MutableStateFlow representing the state of the characters list
@@ -34,21 +41,32 @@ class CharacterListViewModel @Inject constructor(private val repository: Charact
     }
 
     /**
+     * Just set the state as Initial so the whole flow will run again to try and load the list
+     */
+    fun reloadAfterError(){
+        _charactersListState.value = CharactersListState.Initial
+    }
+
+    /**
      * Fetches the list of characters from the repository.
      */
     private fun getCharactersList() {
         Timber.tag(TAG).d("Getting characters list...")
         _charactersListState.value = CharactersListState.Loading
         viewModelScope.launch {
-            try {
-                delay(500) // Just a small delay to provide better user experience between the empty views and the actual data
-                val response = repository.getCharacterList()
-                withContext(Dispatchers.IO) {
-                    _charactersListState.value = CharactersListState.Success(response.data?.characters?.results)
-                    Timber.tag(TAG).d(response.data?.characters?.results.toString())
+            delay(500) // Just a small delay to provide better user experience between the empty views and the actual data
+            if (!networkHelper.isInternetAvailable()){
+                _charactersListState.value = CharactersListState.Error(resourceProvider.getString(R.string.internet_error))
+            } else {
+                try {
+                    val response = repository.getCharacterList()
+                    withContext(Dispatchers.IO) {
+                        _charactersListState.value = CharactersListState.Success(response.data?.characters?.results)
+                        Timber.tag(TAG).d(response.data?.characters?.results.toString())
+                    }
+                } catch (e: Exception){
+                    _charactersListState.value = CharactersListState.Error(resourceProvider.getString(R.string.characters_list_error))
                 }
-            } catch (e: ApolloException) {
-                _charactersListState.value = CharactersListState.Error(e.message.toString())
             }
         }
     }

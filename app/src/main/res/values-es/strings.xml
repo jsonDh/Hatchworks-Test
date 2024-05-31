@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Personajes de Rick &amp; Morty</string>
+    <string name="internet_error">El servicio de internet no está disponible por favor revise y pruebe de nuevo.</string>
+    <string name="empty_list_label">Por el momento no hay una lista de personajes pero deberian de aparecer pronto.</string>
+    <string name="characters_list_error">Ocurrió un error al obtener la lista de personajes, pruebe de nuevo.</string>
+    <string name="characters_details_error">Ocurrió un error al obtener los detalles del personaje, pruebe de nuevo.</string>
+    <string name="empty_details_label">La información de tu personaje está cargando, se mostrará en seguida…</string>
+    <string name="character_detail_status_label">Estado</string>
+    <string name="character_detail_gender_label">Género</string>
+    <string name="character_detail_created_label">Creado</string>
+    <string name="try_again_btn">Intentar de nuevo</string>
+</resources>
