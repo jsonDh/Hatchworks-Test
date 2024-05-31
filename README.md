@@ -10,6 +10,8 @@ Rick & Morty Character Viewer is an Android application that allows users to bro
 - Handles screen rotation
 - Shows loading states for lists and details
 - Implements a clean architecture
+- Supports Spanish and English Languages
+- When a connection issue is encounter you can retry the request
 
 ## Architecture
 The project follows a single-activity architecture with Jetpack Compose for UI and the following key components:
@@ -27,6 +29,7 @@ The project follows a single-activity architecture with Jetpack Compose for UI a
 - **Dependency Injection:** Dagger Hilt
 - **Networking:** Apollo for GraphQL
 - **Themes:** Day/Night support
+- **Testing:** Mockk, Turbine
 
 
 ## Setup and Installation
@@ -84,4 +87,8 @@ Feel free to explore the `docs` folder to gain insights into the project archite
 ![Screenshot_20240524-111225](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/be933eb9-4a47-4b55-bc2b-0d15c4beb542)
 ![Screenshot_20240524-112925](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/f06077f5-6b38-44a6-a131-b5501f32906e)
 
+### Lanscape Views
+![Screenshot_20240531-161045](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/0d60c125-7227-4804-823a-d4c827554351)
+![Screenshot_20240531-161054](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/97850820-0989-4c26-a7da-b4b040913f9c)
+![Screenshot_20240531-161122](https://github.com/jsonDh/Hatchworks-Test/assets/10732606/6254afc5-3148-42c3-931f-74f65fdce706)
 
