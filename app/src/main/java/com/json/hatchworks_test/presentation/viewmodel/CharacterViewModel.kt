@@ -1,10 +1,14 @@
 package com.json.hatchworks_test.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.exception.ApolloException
 import com.json.hatchworks_test.CharacterQuery
+import com.json.hatchworks_test.R
 import com.json.hatchworks_test.domain.repository.CharacterRepository
+import com.json.hatchworks_test.utils.NetworkHelper
+import com.json.hatchworks_test.utils.ResourceProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -20,7 +24,11 @@ import javax.inject.Inject
  * It interacts with the repository to fetch character details and exposes the state using a StateFlow.
  */
 @HiltViewModel
-class CharacterViewModel @Inject constructor(private val repository: CharacterRepository) :
+class CharacterViewModel @Inject constructor(
+    private val repository: CharacterRepository,
+    private val networkHelper: NetworkHelper,
+    private val resourceProvider: ResourceProvider
+) :
     ViewModel() {
 
     // StateFlow representing the state of the character
@@ -41,35 +49,24 @@ class CharacterViewModel @Inject constructor(private val repository: CharacterRe
         fetchCharacterDetails(characterId)
     }
 
-    /**
-     * Collects and logs the current state of the character.
-     */
-    suspend fun listen() {
-        characterState.collect {
-            Timber.tag(TAG).d("State is %s", it)
-        }
-    }
-
     private fun fetchCharacterDetails(characterId: String) {
+        Timber.tag(TAG).d("Getting character details...")
         _characterState.value = CharacterState.Loading
         viewModelScope.launch {
-            try {
-                delay(500) // Just a small delay to provide better user experience between the empty views and the actual data
-                val response = repository.getCharacterDetails(characterId)
-                withContext(Dispatchers.IO) {
-                    _characterState.value = CharacterState.Success(response.data)
+            delay(500) // Just a small delay to provide better user experience between the empty views and the actual data
+            if (!networkHelper.isInternetAvailable()){
+                _characterState.value = CharacterState.Error(resourceProvider.getString(R.string.internet_error))
+            } else {
+                try {
+                    val response = repository.getCharacterDetails(characterId)
+                    withContext(Dispatchers.IO) {
+                        _characterState.value = CharacterState.Success(response.data)
+                    }
+                } catch (e: Exception){
+                    _characterState.value = CharacterState.Error(resourceProvider.getString(R.string.characters_details_error))
                 }
-            } catch (e: ApolloException) {
-                _characterState.value = CharacterState.Error(e.message.toString())
-            } catch (e: Exception) {
-                _characterState.value = CharacterState.Error(e.message.toString())
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        clearData()
     }
 
     companion object {

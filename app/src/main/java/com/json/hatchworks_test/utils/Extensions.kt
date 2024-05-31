@@ -1,6 +1,8 @@
 package com.json.hatchworks_test.utils
 
 import java.text.SimpleDateFormat
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -12,7 +14,10 @@ fun String.formatDate(): String? {
     return date?.let { outputFormat.format(it) } ?: ""
 }
 
-fun String.convertDateStringToReadable(): Date {
+fun String.convertDateStringToReadable(): String {
     val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
-    return inputFormat.parse(this) ?: Date()
+    inputFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+    val date: Date = inputFormat.parse(this) ?: Date()
+    val outputFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.ENGLISH)
+    return outputFormat.format(date)
 }

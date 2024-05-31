@@ -7,6 +7,11 @@ import com.apollographql.apollo3.api.Operation
 import com.apollographql.apollo3.exception.ApolloException
 import com.json.hatchworks_test.CharacterQuery
 import com.json.hatchworks_test.domain.repository.CharacterRepository
+import com.json.hatchworks_test.utils.NetworkHelper
+import com.json.hatchworks_test.utils.ResourceProvider
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -20,23 +25,21 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
-import org.mockito.junit.MockitoJUnitRunner
+import org.junit.runners.JUnit4
 import timber.log.Timber
 import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(MockitoJUnitRunner::class)
+@RunWith(JUnit4::class)
 class CharacterViewModelTest {
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    @Mock
-    private lateinit var repository: CharacterRepository
+    private var repository: CharacterRepository = mockk()
+    private var networkHelper : NetworkHelper = mockk()
+    private var resourceProvider: ResourceProvider = mockk()
+
     private lateinit var viewModel: CharacterViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -44,8 +47,7 @@ class CharacterViewModelTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        viewModel = CharacterViewModel(repository)
+        viewModel = CharacterViewModel(repository, networkHelper, resourceProvider)
         Dispatchers.setMain(testDispatcher)
         Timber.plant(TestTree())
     }
@@ -63,8 +65,11 @@ class CharacterViewModelTest {
         val characterData = createCharacterData("Character 1", "human")
         val response = createApolloResponse(characterData)
 
+        // Mock that the internet is working
+        every { networkHelper.isInternetAvailable() } returns true
+
         // Mock the repository response
-        `when`(repository.getCharacterDetails(characterId)).thenReturn(response)
+        coEvery { repository.getCharacterDetails(characterId) } returns response
 
         // Observe the ViewModel's state
         viewModel.characterState.test {
@@ -83,7 +88,13 @@ class CharacterViewModelTest {
         // Mock an ApolloException
         val characterId = "1"
         val errorMessage = "Network error"
-        `when`(repository.getCharacterDetails(characterId)).thenThrow(ApolloException(errorMessage))
+        coEvery { repository.getCharacterDetails(characterId) } throws ApolloException(errorMessage)
+
+        // Mock that the internet is working
+        every { networkHelper.isInternetAvailable() } returns true
+
+        // Mock the error message
+        every { resourceProvider.getString(any()) } returns errorMessage
 
         // Call the request method
         viewModel.getCharacterDetails(characterId)
@@ -92,6 +103,70 @@ class CharacterViewModelTest {
         viewModel.characterState.test {
             assertEquals(CharacterState.Loading, awaitItem())
             assertEquals(CharacterState.Error(errorMessage), awaitItem())
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `getCharacterDetails no internet connection`() = testScope.runTest {
+        // Mock that the internet is not available
+        every { networkHelper.isInternetAvailable() } returns false
+
+        // Mock an internet issue message
+        val internetIssue = "There is no internet connection"
+        every { resourceProvider.getString(any()) } returns internetIssue
+
+        // Observe the ViewModel's state
+        viewModel.characterState.test {
+            viewModel.getCharacterDetails("1")
+
+            assertEquals(CharacterState.Initial, awaitItem())
+            assertEquals(CharacterState.Loading, awaitItem())
+            assertEquals(
+                CharacterState.Error(internetIssue),
+                awaitItem()
+            )
+
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `getCharacterDetails unexpected repository exception`() = testScope.runTest {
+        // Mock that the internet is working
+        every { networkHelper.isInternetAvailable() } returns true
+
+        // Mock an Unexpected exception message
+        val unexpected = "Unexpected exception"
+        every { resourceProvider.getString(any()) } returns unexpected
+
+        // Mock the repository response to throw an unexpected exception
+        coEvery { repository.getCharacterDetails(any()) } throws RuntimeException(unexpected)
+
+        // Observe the ViewModel's state
+        viewModel.characterState.test {
+            viewModel.getCharacterDetails("1")
+
+            assertEquals(CharacterState.Initial, awaitItem())
+            assertEquals(CharacterState.Loading, awaitItem())
+            assertEquals(
+                CharacterState.Error(unexpected),
+                awaitItem()
+            )
+
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun clearData() = testScope.runTest {
+        // Set the state to an error state
+        viewModel.clearData()
+
+        // Observe the ViewModel's state
+        viewModel.characterState.test {
+            assertEquals(CharacterState.Initial, awaitItem())
+
             cancelAndConsumeRemainingEvents()
         }
     }
@@ -116,13 +191,9 @@ class CharacterViewModelTest {
     private fun createApolloResponse(data: CharacterQuery.Data): ApolloResponse<CharacterQuery.Data> {
         return ApolloResponse.Builder(
             data = data,
-            operation = createMockOperation(),
+            operation = mockk(),
             requestUuid = UUID.randomUUID()
         ).build()
-    }
-
-    private fun createMockOperation(): Operation<CharacterQuery.Data> {
-        return mock(Operation::class.java) as Operation<CharacterQuery.Data>
     }
 
     class TestTree : Timber.Tree() {

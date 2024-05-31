@@ -89,9 +89,11 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
 
+    implementation("io.mockk:mockk:1.12.0") {
+        exclude("org.objenesis", "objenesis")
+    }
     implementation("junit:junit:4.13.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    implementation("org.mockito:mockito-core:4.11.0")
     implementation("androidx.arch.core:core-testing:2.2.0")
     implementation("app.cash.turbine:turbine:0.12.1")
 
