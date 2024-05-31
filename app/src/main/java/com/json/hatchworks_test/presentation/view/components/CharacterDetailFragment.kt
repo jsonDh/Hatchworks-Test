@@ -3,6 +3,7 @@
 package com.json.hatchworks_test.presentation.view.components
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -74,11 +76,11 @@ fun CharacterDetailFragment(
 ) {
     // Collect and handle character state
     LaunchedEffect(Unit) {
+        characterViewModel.clearData()
         characterViewModel.characterState.collect { charactersState ->
             if (charactersState is CharacterState.Initial) {
                 characterViewModel.getCharacterDetails(characterId)
             }
-            characterViewModel.listen()
         }
     }
 
@@ -90,7 +92,7 @@ fun CharacterDetailFragment(
     BackPressHandler(onBackPressed = goBack)
     //Handle screen rotation
     val charactersState by characterViewModel.characterState.collectAsState()
-    var orientation by remember { mutableStateOf(Configuration.ORIENTATION_PORTRAIT) }
+    var orientation by remember { mutableIntStateOf(Configuration.ORIENTATION_PORTRAIT) }
     val configuration = LocalConfiguration.current
     LaunchedEffect(configuration) {
         snapshotFlow { configuration.orientation }
@@ -121,7 +123,9 @@ fun CharacterDetailFragment(
         },
         content = { padding ->
             Box(modifier = Modifier.padding(padding)) {
-                CharacterDetailStates(orientation, charactersState)
+                CharacterDetailStates(orientation, charactersState) {
+                    characterViewModel.clearData()
+                }
             }
         }
     )
@@ -133,10 +137,18 @@ fun CharacterDetailFragment(
  *
  * @param orientation Current screen orientation.
  * @param characterState Current state of character details.
+ * @param onClick Click method called to retry when an error occurs
  */
 @Composable
-fun CharacterDetailStates(orientation: Int, characterState: CharacterState) {
+fun CharacterDetailStates(orientation: Int, characterState: CharacterState, onClick : () -> Unit) {
     when (characterState) {
+        is CharacterState.Initial -> {
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                EmptyViewLandscape()
+            } else {
+                EmptyView()
+            }
+        }
         is CharacterState.Success -> {
             val character = characterState.data?.character
             if (character != null)
@@ -147,16 +159,9 @@ fun CharacterDetailStates(orientation: Int, characterState: CharacterState) {
                 }
         }
 
-        is CharacterState.Loading -> {
-            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                EmptyViewLandscape()
-            } else {
-                EmptyView()
-            }
-        }
+        is CharacterState.Loading -> ShowLoading()
 
-        is CharacterState.Error -> ShowError(message = stringResource(id = R.string.characters_details_error))
-        else -> {}
+        is CharacterState.Error -> ShowError(orientation, message = characterState.message){ onClick() }
     }
 }
 
@@ -217,18 +222,22 @@ fun ShowCharacterDetails(character: CharacterQuery.Character) {
         }
         // Character details
         Column {
-            val date = character.created.toString().convertDateStringToReadable().toString()
+            val date = character.created.toString().convertDateStringToReadable()
             DetailData(
                 image = R.drawable.heart,
-                property = "Status",
+                property = stringResource(id = R.string.character_detail_status_label),
                 detail = character.status.toString()
             )
             DetailData(
                 image = R.drawable.gender,
-                property = "Gender",
+                property = stringResource(id = R.string.character_detail_gender_label),
                 detail = character.gender.toString()
             )
-            DetailData(image = R.drawable.date, property = "Created", detail = date)
+            DetailData(
+                image = R.drawable.date,
+                property = stringResource(id = R.string.character_detail_created_label),
+                detail = date
+            )
         }
     }
 }
@@ -273,7 +282,7 @@ fun EmptyView() {
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "Details from your character are loading, they will show up soon...",
+                text = stringResource(id = R.string.empty_details_label),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(20.dp, 150.dp)
@@ -326,7 +335,7 @@ fun EmptyViewLandscape() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Details from your character are loading, they will show up soon...",
+                text = stringResource(id = R.string.empty_details_label),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(20.dp, 250.dp)

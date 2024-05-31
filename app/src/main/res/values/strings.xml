@@ -1,5 +1,12 @@
 <resources>
-    <string name="app_name">Hatchworks-Test</string>
-    <string name="characters_list_error">An error occurred while getting the characters list.</string>
+    <string name="app_name">Rick &amp; Morty Characters</string>
+    <string name="internet_error">Internet service is not available please check and try again.</string>
+    <string name="empty_list_label">There is no character list at the moment but surely some will come up soon.</string>
+    <string name="characters_list_error">An error occurred while getting the characters list, please try again.</string>
     <string name="characters_details_error">An error occurred while getting the character details.</string>
+    <string name="empty_details_label">Details from your character are loading, they will show up soon…</string>
+    <string name="character_detail_status_label">Status</string>
+    <string name="character_detail_gender_label">Gender</string>
+    <string name="character_detail_created_label">Created</string>
+    <string name="try_again_btn">Try Again</string>
 </resources>
